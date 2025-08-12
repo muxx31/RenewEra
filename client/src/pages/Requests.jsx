@@ -4,7 +4,7 @@ const Requests = () => {
   const [requests, setRequests] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5002/api/requests')
+    fetch('https://renewera-server.onrender.com/api/requests')
       .then(res => res.json())
       .then(data => setRequests(data))
       .catch(err => console.error(err));

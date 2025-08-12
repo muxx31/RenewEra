@@ -16,7 +16,7 @@ const Startups = () => {
     if (!token) return; // No token, can't fetch
 
     // Fetch startup profile
-    fetch('http://localhost:5002/api/startups/profile', {
+    fetch('https://renewera-server.onrender.com/api/startups/profile', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -30,7 +30,7 @@ const Startups = () => {
       .catch(err => console.error(err));
 
     // Fetch requests made to this startup
-    fetch('http://localhost:5002/api/requests/mystartup', {
+    fetch('https://renewera-server.onrender.com/api/requests/mystartup', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -51,7 +51,7 @@ const Startups = () => {
       return;
     }
 
-    fetch(`http://localhost:5002/api/suppliers/search?q=${encodeURIComponent(searchTerm)}`, {
+    fetch(`https://renewera-server.onrender.com/api/suppliers/search?q=${encodeURIComponent(searchTerm)}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())

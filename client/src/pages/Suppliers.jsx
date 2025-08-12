@@ -17,7 +17,7 @@ const SuppliersDashboard = ({ token }) => {
   useEffect(() => {
     if (!token) return;
 
-    fetch('http://localhost:5002/api/supplier-materials', {
+    fetch('https://renewera-server.onrender.com/api/supplier-materials', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -29,7 +29,7 @@ const SuppliersDashboard = ({ token }) => {
   useEffect(() => {
     if (!token) return;
 
-    fetch('http://localhost:5002/api/supplier-materials/requests', {
+    fetch('https://renewera-server.onrender.com/api/supplier-materials/requests', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -58,7 +58,7 @@ const SuppliersDashboard = ({ token }) => {
   const handleSubmit = e => {
     e.preventDefault();
 
-    fetch('http://localhost:5002/api/supplier-materials', {
+    fetch('https://renewera-server.onrender.com/api/supplier-materials', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

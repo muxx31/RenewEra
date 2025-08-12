@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Carrois+Gothic&family=Chewy&family=Fleur+De+Leah&family=Manufacturing+Consent&family=Poetsen+One&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
+
+:root{
+  .poetsen-one-regular {
+    font-family: "Poetsen One", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+}
+
+body {
+  font-family: "Poetsen One", sans-serif;
+  background-color: #705340; /* light gray background */
+}

@@ -19,7 +19,7 @@ const PostMaterial = () => {
 
     const token = localStorage.getItem('token'); // Get JWT token from localStorage
 
-    fetch('http://localhost:5002/api/posts', {
+    fetch('https://renewera-server.onrender.com/api/posts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

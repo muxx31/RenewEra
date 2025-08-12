@@ -30,7 +30,7 @@ const LoginSignup = () => {
       ? '/auth/supplier/signup'
       : '/auth/startup/signup';
 
-    fetch(`http://localhost:5002/api${endpoint}`, {
+    fetch(`https://renewera-server.onrender.com/api${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),

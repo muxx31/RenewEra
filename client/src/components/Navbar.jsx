@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   return (
-    <nav className="bg-amber-950 min-w-screen fixed text-white px-6 py-4 flex justify-between items-center">
+    <nav className="bg-yellow-900 min-w-screen fixed text-white px-6 py-4 flex justify-between items-center">
       <Link to="/" className="text-xl font-bold">
         RenewEra
       </Link>

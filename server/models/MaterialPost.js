@@ -1,23 +1,14 @@
 const mongoose = require('mongoose');
 
 const materialPostSchema = new mongoose.Schema({
-  supplier: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Supplier',
-    required: true,
-  },
-  title: { type: String, required: true },
-  description: { type: String },
+  supplier: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier', required: true },
   materialType: { type: String, required: true },
   quantity: { type: Number, required: true },
-  unit: { type: String, required: true },
   pickupAddress: { type: String, required: true },
-  freeOrPaid: { type: String, required: true },  // e.g., 'free' or 'paid'
-  status: {
-    type: String,
-    enum: ['available', 'claimed', 'completed'],
-    default: 'available',
-  },
+  freeOrPaid: { type: String, required: true },
+  description: { type: String },
+  status: { type: String, enum: ['available', 'claimed', 'completed'], default: 'available' },
+  file: { type: String },
   createdAt: { type: Date, default: Date.now },
 });
 

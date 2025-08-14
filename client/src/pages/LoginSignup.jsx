@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';  // <-- Import useNavigate
 import FormInput from '../components/FormInput';
+import { BACKEND_URL } from '../utils/config.js';
 
 const LoginSignup = () => {
   const navigate = useNavigate();  // <-- Initialize navigate
@@ -30,7 +31,7 @@ const LoginSignup = () => {
       ? '/auth/supplier/signup'
       : '/auth/startup/signup';
 
-    fetch(`https://renewera-server.onrender.com/api${endpoint}`, {
+    fetch(`${BACKEND_URL}/api${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),

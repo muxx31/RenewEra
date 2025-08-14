@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SearchBar from '../components/SearchBar';
 import SupplierCard from '../components/SupplierCard';
+import { BACKEND_URL } from '../utils/config.js';
 
 const Startups = () => {
   const [startup, setStartup] = useState(null);           // logged-in startup info
@@ -16,7 +17,7 @@ const Startups = () => {
     if (!token) return; // No token, can't fetch
 
     // Fetch startup profile
-    fetch('https://renewera-server.onrender.com/api/startups/profile', {
+    fetch(`${BACKEND_URL}/api/startups/profile`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())

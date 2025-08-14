@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { BACKEND_URL } from '../utils/config.js';
 
 const Requests = () => {
   const [requests, setRequests] = useState([]);
 
   useEffect(() => {
-    fetch('https://renewera-server.onrender.com/api/requests')
+    fetch(`${BACKEND_URL}/api/requests`)
       .then(res => res.json())
       .then(data => setRequests(data))
       .catch(err => console.error(err));

@@ -13,16 +13,17 @@ const getMaterialPosts = async (req, res) => {
 };
 
 // Get material post by ID
-const getMaterialPostById = async (req, res) => {
+const getMaterials = async (req, res) => {
   try {
-    const post = await MaterialPost.findById(req.params.id)
-      .populate('startup', 'name email');
-    if (!post) return res.status(404).json({ message: 'Material post not found' });
-    res.json(post);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    const materials = await Material.find({ supplier: req.user.id })
+      .sort({ createdAt: -1 });
+    res.json(materials);
+  } catch (err) {
+    console.error('Get Materials Error:', err);
+    res.status(500).json({ message: 'Server error fetching materials' });
   }
 };
+
 
 // Create material post (protected)
 const createMaterialPost = async (req, res) => {

@@ -1,46 +1,32 @@
 import React, { useState, useEffect } from 'react';
+import { BACKEND_URL } from '../utils/config.js';
 
-const SuppliersDashboard = ({ token }) => {
+const token = localStorage.getItem('token'); // get token
+
+const SuppliersDashboard = () => {
   const [materials, setMaterials] = useState([]);
   const [requests, setRequests] = useState([]);
   const [activeTab, setActiveTab] = useState('listings');
-
   const [newMaterial, setNewMaterial] = useState({
     materialType: '',
     quantity: '',
     pickupAddress: '',
-    freeOrPaid: 'free',  // must match backend enum 'free' or 'paid'
+    freeOrPaid: 'free',
     description: '',
   });
 
-  // Fetch materials posted by logged-in supplier
   useEffect(() => {
     if (!token) return;
-
-    fetch('https://renewera-server.onrender.com/api/supplier-materials', {
+    fetch(`${BACKEND_URL}/api/supplier-materials`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
       .then(data => setMaterials(data))
       .catch(err => console.error('Error fetching materials:', err));
-  }, [token]);
+  }, []);
 
-  // Fetch requests received for supplier's materials
-  useEffect(() => {
-    if (!token) return;
-
-    fetch('https://renewera-server.onrender.com/api/supplier-materials/requests', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => res.json())
-      .then(data => setRequests(data))
-      .catch(err => console.error('Error fetching requests:', err));
-  }, [token]);
-
-  // Handle form input changes
   const handleInputChange = e => {
     const { name, value, type, checked } = e.target;
-
     if (name === 'freeOrPaid') {
       setNewMaterial(prev => ({
         ...prev,
@@ -54,77 +40,62 @@ const SuppliersDashboard = ({ token }) => {
     }
   };
 
-  // Submit new material form
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
+    try {
+      const formData = new FormData();
+      Object.keys(newMaterial).forEach(key => {
+        formData.append(key, newMaterial[key]);
+      });
 
-    fetch('https://renewera-server.onrender.com/api/supplier-materials', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        ...newMaterial,
-        quantity: Number(newMaterial.quantity), // ensure number type
-      }),
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to add material');
-        return res.json();
-      })
-      .then(addedMaterial => {
-        setMaterials(prev => [addedMaterial, ...prev]);
-        // Reset form after adding
-        setNewMaterial({
-          materialType: '',
-          quantity: '',
-          pickupAddress: '',
-          freeOrPaid: 'free',
-          description: '',
-        });
-        setActiveTab('listings');
-      })
-      .catch(err => alert(err.message));
+      const response = await fetch(`${BACKEND_URL}/api/supplier-materials`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }, // do NOT set Content-Type manually
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to add material');
+
+      setMaterials(prev => [data, ...prev]);
+      setNewMaterial({
+        materialType: '',
+        quantity: '',
+        pickupAddress: '',
+        freeOrPaid: 'free',
+        description: '',
+      });
+      setActiveTab('listings');
+    } catch (err) {
+      console.error('Error submitting material:', err);
+      alert(`Error: ${err.message}`);
+    }
   };
 
   return (
     <div className="max-w-5xl mx-auto p-6">
       <h2 className="text-3xl font-bold mb-6">Supplier Dashboard</h2>
 
+      {/* Tabs */}
       <div className="mb-6 flex space-x-4">
         <button
-          className={`px-4 py-2 font-semibold rounded ${
-            activeTab === 'listings' ? 'bg-blue-600 text-white' : 'bg-gray-200'
-          }`}
+          className={activeTab === 'listings' ? 'bg-blue-600 text-white px-4 py-2 rounded' : 'bg-gray-200 px-4 py-2 rounded'}
           onClick={() => setActiveTab('listings')}
         >
           My Listings
         </button>
         <button
-          className={`px-4 py-2 font-semibold rounded ${
-            activeTab === 'add' ? 'bg-blue-600 text-white' : 'bg-gray-200'
-          }`}
+          className={activeTab === 'add' ? 'bg-blue-600 text-white px-4 py-2 rounded' : 'bg-gray-200 px-4 py-2 rounded'}
           onClick={() => setActiveTab('add')}
         >
           Add New Material
         </button>
-        <button
-          className={`px-4 py-2 font-semibold rounded ${
-            activeTab === 'requests' ? 'bg-blue-600 text-white' : 'bg-gray-200'
-          }`}
-          onClick={() => setActiveTab('requests')}
-        >
-          Requests Received
-        </button>
       </div>
 
+      {/* Listings Tab */}
       {activeTab === 'listings' && (
         <div>
-          <h3 className="text-xl font-semibold mb-4">My Listings</h3>
-          {materials.length === 0 ? (
-            <p>No materials posted yet.</p>
-          ) : (
+          {materials.length === 0 ? <p>No materials posted yet.</p> : (
             <table className="min-w-full border border-gray-300">
               <thead>
                 <tr className="bg-gray-100">
@@ -151,108 +122,20 @@ const SuppliersDashboard = ({ token }) => {
         </div>
       )}
 
+      {/* Add Material Tab */}
       {activeTab === 'add' && (
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Add New Material</h3>
-          <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-            <div>
-              <label className="block mb-1 font-medium">Material Type</label>
-              <input
-                type="text"
-                name="materialType"
-                value={newMaterial.materialType}
-                onChange={handleInputChange}
-                required
-                className="w-full border px-3 py-2 rounded"
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1 font-medium">Quantity</label>
-              <input
-                type="number"
-                name="quantity"
-                value={newMaterial.quantity}
-                onChange={handleInputChange}
-                required
-                min="1"
-                className="w-full border px-3 py-2 rounded"
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1 font-medium">Pickup Address</label>
-              <input
-                type="text"
-                name="pickupAddress"
-                value={newMaterial.pickupAddress}
-                onChange={handleInputChange}
-                required
-                className="w-full border px-3 py-2 rounded"
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="freeOrPaid"
-                checked={newMaterial.freeOrPaid === 'free'}
-                onChange={handleInputChange}
-                id="freeOrPaid"
-              />
-              <label htmlFor="freeOrPaid">Is this material free?</label>
-            </div>
-
-            <div>
-              <label className="block mb-1 font-medium">Description</label>
-              <textarea
-                name="description"
-                value={newMaterial.description}
-                onChange={handleInputChange}
-                rows={3}
-                className="w-full border px-3 py-2 rounded"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              Add Material
-            </button>
-          </form>
-        </div>
-      )}
-
-      {activeTab === 'requests' && (
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Requests Received</h3>
-          {requests.length === 0 ? (
-            <p>No requests received yet.</p>
-          ) : (
-            <ul>
-              {requests.map(req => (
-                <li key={req._id} className="border rounded p-3 mb-3">
-                  <p>
-                    <strong>Startup:</strong> {req.startup?.name || 'N/A'}
-                  </p>
-                  <p>
-                    <strong>Material Requested:</strong> {req.materialPost?.materialType || 'N/A'}
-                  </p>
-                  <p>
-                    <strong>Message:</strong> {req.message || 'N/A'}
-                  </p>
-                  <p>
-                    <strong>Offer Price:</strong> {req.offerPrice || 'N/A'}
-                  </p>
-                  <p>
-                    <strong>Status:</strong> {req.status || 'N/A'}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+          <input type="text" name="materialType" placeholder="Material Type" value={newMaterial.materialType} onChange={handleInputChange} required className="w-full border px-3 py-2 rounded"/>
+          <input type="number" name="quantity" placeholder="Quantity" value={newMaterial.quantity} onChange={handleInputChange} required className="w-full border px-3 py-2 rounded"/>
+          <input type="text" name="pickupAddress" placeholder="Pickup Address" value={newMaterial.pickupAddress} onChange={handleInputChange} required className="w-full border px-3 py-2 rounded"/>
+          <div>
+            <label>
+              <input type="checkbox" name="freeOrPaid" checked={newMaterial.freeOrPaid === 'free'} onChange={handleInputChange}/> Free
+            </label>
+          </div>
+          <textarea name="description" placeholder="Description" value={newMaterial.description} onChange={handleInputChange} className="w-full border px-3 py-2 rounded"/>
+          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Add Material</button>
+        </form>
       )}
     </div>
   );

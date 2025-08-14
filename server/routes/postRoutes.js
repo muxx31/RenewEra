@@ -1,28 +1,15 @@
 const express = require('express');
-
 const router = express.Router();
-const {
-  getMaterialPosts,
-  getMaterialPostById,
-  createMaterialPost,
-  updateMaterialPost,
-  deleteMaterialPost,
-} = require('../controllers/postController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { getMaterials, getRequests, addMaterial } = require('../controllers/supplierMaterialController');
+const authMiddleware = require('../middleware/authMiddleware'); // to get req.user
 
-// Get all material posts
-router.get('/', getMaterialPosts);
+// Get all materials for logged-in supplier
+router.get('/', authMiddleware, getMaterials);
 
-// Get material post by ID
-router.get('/:id', getMaterialPostById);
+// Get requests received for supplier's materials
+router.get('/requests', authMiddleware, getRequests);
 
-// Create material post (protected)
-router.post('/', authMiddleware, createMaterialPost);
-
-// Update material post (protected)
-router.put('/:id', authMiddleware, updateMaterialPost);
-
-// Delete material post (protected)
-router.delete('/:id', authMiddleware, deleteMaterialPost);
+// Post a new material
+router.post('/', authMiddleware, addMaterial);
 
 module.exports = router;

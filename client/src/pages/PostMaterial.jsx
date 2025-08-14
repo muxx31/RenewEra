@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import FormInput from '../components/FormInput';
+import { BACKEND_URL } from '../utils/config.js';
 
 const PostMaterial = () => {
   const [formData, setFormData] = useState({
@@ -19,7 +20,7 @@ const PostMaterial = () => {
 
     const token = localStorage.getItem('token'); // Get JWT token from localStorage
 
-    fetch('https://renewera-server.onrender.com/api/posts', {
+    fetch(`${BACKEND_URL}/api/posts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

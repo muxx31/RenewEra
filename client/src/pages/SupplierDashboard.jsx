@@ -78,31 +78,41 @@ const SupplierDashboard = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Supplier Dashboard</h1>
-        <button onClick={onLogout} className="bg-yellow-900 text-white px-4 py-2 rounded">
+    <div className="min-h-screen bg-radial-[at_50%_75%] from-white via-yellow-50 to-yellow-100 to-90% p-4 sm:p-6 md:p-8">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 sm:gap-0">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center sm:text-left">Welcome, {user?.name || "Supplier!"}</h1>
+        <button
+          onClick={onLogout}
+          className="border-yellow-950 border-double border-8 bg-amber-100 text-yellow-950 px-4 py-2 rounded w-full sm:w-auto hover:bg-red-100"
+        >
           Logout
         </button>
       </div>
 
       {/* Horizontal buttons for tabs */}
-      <div className="flex space-x-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:space-x-4 gap-3 sm:gap-0 mb-6">
         <button
           onClick={() => setActiveTab("browse")}
-          className={`px-4 py-2 rounded ${activeTab === "browse" ? "bg-yellow-900 text-white" : "bg-gray-300"}`}
+          className={`px-4 py-2 rounded w-full sm:w-auto ${
+            activeTab === "browse" ? "bg-yellow-900 text-white" : "bg-gray-300"
+          }`}
         >
           Browse Requirements
         </button>
         <button
           onClick={() => setActiveTab("upload")}
-          className={`px-4 py-2 rounded ${activeTab === "upload" ? "bg-yellow-900 text-white" : "bg-gray-300"}`}
+          className={`px-4 py-2 rounded w-full sm:w-auto ${
+            activeTab === "upload" ? "bg-yellow-900 text-white" : "bg-gray-300"
+          }`}
         >
           Upload Material
         </button>
         <button
           onClick={() => setActiveTab("my")}
-          className={`px-4 py-2 rounded ${activeTab === "my" ? "bg-yellow-900 text-white" : "bg-gray-300"}`}
+          className={`px-4 py-2 rounded w-full sm:w-auto ${
+            activeTab === "my" ? "bg-yellow-900 text-white" : "bg-gray-300"
+          }`}
         >
           My Materials
         </button>
@@ -110,7 +120,7 @@ const SupplierDashboard = ({ user, onLogout }) => {
 
       {/* Conditional rendering */}
       {activeTab === "browse" && (
-        <>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
           {requirements.map((req) => (
             <Card
               key={req._id}
@@ -119,18 +129,21 @@ const SupplierDashboard = ({ user, onLogout }) => {
               isNotified={notifiedIds.includes(req._id)}
             />
           ))}
-        </>
+        </div>
       )}
 
       {activeTab === "upload" && (
-        <form className="bg-white p-4 rounded shadow" onSubmit={handleUpload}>
+        <form
+          className="bg-white p-4 sm:p-6 rounded shadow max-w-lg mx-auto w-full"
+          onSubmit={handleUpload}
+        >
           <input
             name="materialType"
             value={formData.materialType}
             onChange={handleInputChange}
             placeholder="Material Type"
             required
-            className="w-full p-2 mb-2 border rounded"
+            className="w-full p-2 mb-3 border rounded"
           />
           <input
             name="weight"
@@ -139,13 +152,13 @@ const SupplierDashboard = ({ user, onLogout }) => {
             placeholder="Weight (kg)"
             type="number"
             required
-            className="w-full p-2 mb-2 border rounded"
+            className="w-full p-2 mb-3 border rounded"
           />
           <select
             name="freeOrPaid"
             value={formData.freeOrPaid}
             onChange={handleInputChange}
-            className="w-full p-2 mb-2 border rounded"
+            className="w-full p-2 mb-3 border rounded"
           >
             <option value="free">Free</option>
             <option value="paid">Paid</option>
@@ -155,36 +168,39 @@ const SupplierDashboard = ({ user, onLogout }) => {
             value={formData.additionalInfo}
             onChange={handleInputChange}
             placeholder="Additional Info"
-            className="w-full p-2 mb-2 border rounded"
+            className="w-full p-2 mb-3 border rounded"
           />
-          <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
+          <button
+            type="submit"
+            className="bg-green-500 text-white px-4 py-2 rounded w-full sm:w-auto"
+          >
             Upload
           </button>
         </form>
       )}
 
       {activeTab === "my" && (
-        <>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
           {myMaterials.map((m) => (
             <div
               key={m._id}
-              className="bg-white p-4 rounded shadow flex justify-between items-center mb-2"
+              className="bg-white p-4 rounded shadow flex flex-col justify-between gap-3"
             >
               <div>
-                <h3 className="font-bold">{m.materialType}</h3>
+                <h3 className="font-bold text-lg">{m.materialType}</h3>
                 <p>Weight: {m.weight} kg</p>
                 <p>{m.freeOrPaid}</p>
                 <p>{m.additionalInfo}</p>
               </div>
               <button
                 onClick={() => handleDeleteMaterial(m._id)}
-                className="bg-red-500 text-white px-4 py-2 rounded"
+                className="border-2 border-red-800 text-red-800 px-4 py-2 rounded w-full sm:w-auto"
               >
                 Delete
               </button>
             </div>
           ))}
-        </>
+        </div>
       )}
     </div>
   );

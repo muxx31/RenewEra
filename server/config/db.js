@@ -1,18 +1,17 @@
-// config/db.js
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
-  if (mongoose.connection.readyState === 1) {
-    // already connected
-    return;
+  try {
+    const uri = process.env.MONGO_URI;
+    if (!uri) throw new Error('MONGO_URI not set in env');
+    await mongoose.connect(uri, {
+      // options are handled by Mongoose defaults in modern versions
+    });
+    console.log('MongoDB connected');
+  } catch (err) {
+    console.error('MongoDB connection error:', err.message);
+    process.exit(1);
   }
-  const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/yourdbname';
-  await mongoose.connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  });
-  console.log('MongoDB connected');
 };
 
 module.exports = connectDB;
-

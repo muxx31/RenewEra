@@ -1,117 +1,150 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';  // <-- Import useNavigate
-import FormInput from '../components/FormInput';
-import { BACKEND_URL } from '../utils/config.js';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { BACKEND_URL } from "../utils/config";
 
-const LoginSignup = () => {
-  const navigate = useNavigate();  // <-- Initialize navigate
+const LoginSignup = ({ onLogin }) => {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '', // For signup
-    userType: 'supplier', // or 'startup'
+    name: "",
+    email: "",
+    password: "",
+    role: "supplier", // default role
   });
 
-  const toggleMode = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const toggleForm = () => {
     setIsLogin(!isLogin);
-    setFormData({ email: '', password: '', name: '', userType: 'supplier' });
+    setError("");
   };
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
-    const endpoint = isLogin
-      ? '/auth/login'
-      : formData.userType === 'supplier'
-      ? '/auth/supplier/signup'
-      : '/auth/startup/signup';
+    try {
+      const url = isLogin
+        ? `${BACKEND_URL}/api/auth/login`
+        : `${BACKEND_URL}/api/auth/signup`;
 
-    fetch(`${BACKEND_URL}/api${endpoint}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    })
-      .then(async res => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Something went wrong');
+      const { data } = await axios.post(url, formData);
 
-        alert(isLogin ? 'Logged in successfully!' : 'Signed up successfully!');
+      // Save user + token in localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-        // Save token (optional, depends on your app)
-        if (data.token) localStorage.setItem('token', data.token);
+      // Pass user info to parent App
+      onLogin(data.user);
 
-        if (isLogin) {
-          // Use role from backend response to redirect
-          const userRole = data.user?.role;
-
-          if (userRole === 'supplier') {
-            navigate('/suppliers');
-          } else if (userRole === 'startup') {
-            navigate('/startups');
-          } else {
-            navigate('/');
-          }
-        } else {
-          // After signup, optionally navigate to login or dashboard
-          navigate('/login');
-        }
-      })
-      .catch(err => alert(err.message));
+      // Redirect based on role
+      if (data.user.role === "supplier") {
+        navigate("/supplier");
+      } else if (data.user.role === "startup") {
+        navigate("/startup");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 border rounded shadow mt-10">
-      <h2 className="text-2xl font-semibold mb-6">{isLogin ? 'Login' : 'Sign Up'}</h2>
-      {!isLogin && (
-        <div className="mb-4">
-          <label className="block mb-1 font-semibold">User Type</label>
-          <select
-            name="userType"
-            value={formData.userType}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center mb-6">
+          {isLogin ? "Login" : "Sign Up"}
+        </h2>
+
+        {error && (
+          <div className="bg-red-100 text-red-700 p-2 mb-4 rounded">{error}</div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Show name field only for signup */}
+          {!isLogin && (
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter your name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border rounded"
+            />
+          )}
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            value={formData.email}
             onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
+            required
+            className="w-full px-3 py-2 border rounded"
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 border rounded"
+          />
+
+          {/* Role selection */}
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 border rounded"
           >
             <option value="supplier">Supplier</option>
             <option value="startup">Startup</option>
           </select>
-        </div>
-      )}
-      {!isLogin && (
-        <FormInput label="Name" name="name" value={formData.name} onChange={handleChange} placeholder="Your full name" />
-      )}
-      <FormInput
-        label="Email"
-        name="email"
-        type="email"
-        value={formData.email}
-        onChange={handleChange}
-        placeholder="Email address"
-      />
-      <FormInput
-        label="Password"
-        name="password"
-        type="password"
-        value={formData.password}
-        onChange={handleChange}
-        placeholder="Password"
-      />
-      <button
-        onClick={handleSubmit}
-        className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        {isLogin ? 'Login' : 'Sign Up'}
-      </button>
-      <p className="mt-4 text-center text-sm">
-        {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
-        <button className="text-blue-600 underline" onClick={toggleMode}>
-          {isLogin ? 'Sign Up' : 'Login'}
-        </button>
-      </p>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+          >
+            {loading
+              ? isLogin
+                ? "Logging in..."
+                : "Signing up..."
+              : isLogin
+              ? "Login"
+              : "Sign Up"}
+          </button>
+        </form>
+
+        <p className="text-center mt-4">
+          {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+          <span
+            onClick={toggleForm}
+            className="text-green-600 cursor-pointer hover:underline"
+          >
+            {isLogin ? "Sign Up" : "Login"}
+          </span>
+        </p>
+      </div>
     </div>
   );
 };

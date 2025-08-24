@@ -1,36 +1,77 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
+import Home from "./pages/Home";
+import LoginSignup from "./pages/LoginSignup";
+import SupplierDashboard from "./pages/SupplierDashboard";
+import StartupDashboard from "./pages/StartupDashboard";
 
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+function App() {
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
-import Home from './pages/Home';
-import Suppliers from './pages/Suppliers';
-import Startups from './pages/Startups';
-import PostMaterial from './pages/PostMaterial';
-import Requests from './pages/Requests';
-import LoginSignup from './pages/LoginSignup';
+  // Load user from localStorage on mount
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      setUser(storedUser);
 
-const App = () => {
+      // Navigate based on role
+      if (storedUser.role === "supplier") {
+        navigate("/supplier");
+      } else if (storedUser.role === "startup") {
+        navigate("/startup");
+      } else {
+        navigate("/"); // fallback for invalid role
+      }
+    }
+  }, []);
+
+  const handleLogin = (userData) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
+
+    // Navigate based on role after login/signup
+    if (userData.role === "supplier") {
+      navigate("/supplier");
+    } else if (userData.role === "startup") {
+      navigate("/startup");
+    } else {
+      navigate("/");
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    navigate("/");
+  };
+
   return (
-    <Router>
-      <div className="flex flex-col min-h-screen m-0">
-        <Navbar />
-        <main className="flex-grow container ">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/suppliers" element={<Suppliers />} />
-            <Route path="/startups" element={<Startups />} />
-            <Route path="/post-material" element={<PostMaterial />} />
-            <Route path="/requests" element={<Requests />} />
-            <Route path="/login" element={<LoginSignup />} />
-            {/* Add 404 route if you want */}
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/auth" element={<LoginSignup onLogin={handleLogin} />} />
+      <Route
+        path="/supplier"
+        element={
+          user?.role === "supplier" ? (
+            <SupplierDashboard user={user} onLogout={handleLogout} />
+          ) : (
+            <Home />
+          )
+        }
+      />
+      <Route
+        path="/startup"
+        element={
+          user?.role === "startup" ? (
+            <StartupDashboard user={user} onLogout={handleLogout} />
+          ) : (
+            <Home />
+          )
+        }
+      />
+    </Routes>
   );
-};
+}
 
 export default App;
